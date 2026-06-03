@@ -1,20 +1,18 @@
-# Utilisation d'une image de base Node.js
 FROM node:18-alpine
 
-# Création du répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copie des fichiers du projet dans le conteneur
+RUN apk add --no-cache curl
+
 COPY package*.json ./
 
-# Installation des dépendances
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
-# Copie du reste des fichiers dans le conteneur
 COPY . .
 
-# Exposition du port utilisé par l'application
 EXPOSE 3000
 
-# Commande pour démarrer l'application
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
 CMD ["node", "src/app.js"]
