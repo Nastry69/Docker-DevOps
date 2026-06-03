@@ -1,9 +1,25 @@
-const app = require("express")();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const taskRoutes = require('./routes/tasks');
+const errorHandler = require('./middleware/errorHandler');
 
-app.get("/", (req, res) => res.json({ message: "Bonjouuuur :)" }));
+const app = express();
 
-const port = process.env.PORT || 3000;
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
 
-app.listen(port, () =>
-  console.log(`app listening on http://localhost:${port}`)
-);
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date() });
+});
+
+app.use('/api/tasks', taskRoutes);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+module.exports = app;
